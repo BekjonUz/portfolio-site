@@ -18,7 +18,7 @@ type ProfileSidebarProps = {
 
 export function ProfileSidebar({ profile }: ProfileSidebarProps) {
 	const preview = profile.image ? profile.image : null;
-
+ 
 	return (
 		<div className="w-full lg:w-72 lg:shrink-0">
 			<Card className="py-0 overflow-hidden gap-0">

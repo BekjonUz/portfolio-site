@@ -47,7 +47,7 @@ export default function TeacherDetail() {
   const teacherId = Number(id);
 
   const [activeTab, setActiveTab] = useState("researches");
-
+ 
   // API Ma'lumotlari
   const { data: response, isLoading } = useGetTeacherById(teacherId);
   const { mutate: updateProfile, isPending: isUpdatingProfile } = useUpdateTeacherProfile();
@@ -140,6 +140,7 @@ export default function TeacherDetail() {
         <ProfileSidebar profile={profileValues} />
         <div className="w-full lg:flex-1">
           <ProfileForm
+          key={teacherId}
             defaultValues={profileValues}
             positionsOptions={positionsOptions}
             departmentsOptions={departmentsOptions}

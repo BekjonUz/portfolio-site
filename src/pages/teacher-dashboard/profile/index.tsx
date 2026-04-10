@@ -71,6 +71,7 @@ export default function TeacherProfile() {
       <ProfileSidebar profile={profileValues} />
       <div className="w-full lg:flex-1">
         <ProfileForm
+          key={teacherId}
           defaultValues={profileValues} 
           onSubmit={handleProfileSubmit}
           isPending={isPending}
