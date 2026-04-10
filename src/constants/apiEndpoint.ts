@@ -8,11 +8,12 @@ const API_ENDPOINTS = {
     PDF: "/api/v1/files/pdf",
   },
   COLLAGE: {
-    GETALL: "/college",
-    CREATE: "college",
-    DELETE: "college/:id",
-    EDIT: "college/:id",
-  },
+  GETALL: "/college",
+  GETPAGE: "/college/page",
+  CREATE: "college",
+  DELETE: "college/:id",
+  EDIT: "college/:id",
+},
   DEPARTMENT: {
     CREATE: "department",
     GET: "department/list",

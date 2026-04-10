@@ -4,13 +4,9 @@ import { ConfirmPopover } from "@/components/confirm-popover/confirm-popover";
 import { FileInput } from "@/components/file-input/file-input";
 import { Modal } from "@/components/modal/modal";
 import { TableToolbar } from "@/components/table-toolbar/table-toolbar";
-import {
-  useModalActions,
-  useModalEditData,
-  useModalIsOpen,
-} from "@/store/modalStore";
+import { useModalActions, useModalEditData, useModalIsOpen } from "@/store/modalStore";
 import { useCreateCollage } from "@/hooks/collage/useCreateCollage";
-import { useCollage } from "@/hooks/collage/useCollage";
+import { useCollagePage } from "@/hooks/collage/useCollagePage";
 import { useDeleteCollage } from "@/hooks/collage/useDeleteCollage";
 import { useEditCollage } from "@/hooks/collage/useEditCollage";
 import { Button } from "@/ui/button";
@@ -38,9 +34,7 @@ function createColumns(
       accessorKey: "id",
       header: "#",
       cell: ({ row }) => (
-        <span className="text-muted-foreground">
-          {page * 10 + row.index + 1}
-        </span>
+        <span className="text-muted-foreground">{page * 10 + row.index + 1}</span>
       ),
     },
     {
@@ -54,9 +48,7 @@ function createColumns(
             alt={row.original.name}
             width={30}
             height={30}
-            preview={{
-              mask: null,
-            }}
+            preview={{ mask: null }}
             className="w-9 h-9 rounded-full object-cover"
           />
         ) : (
@@ -69,9 +61,7 @@ function createColumns(
     {
       accessorKey: "name",
       header: "Fakultet",
-      cell: ({ row }) => (
-        <span className="font-medium">{row.getValue("name")}</span>
-      ),
+      cell: ({ row }) => <span className="font-medium">{row.getValue("name")}</span>,
     },
     {
       id: "actions",
@@ -83,16 +73,14 @@ function createColumns(
             onClick={() => onEdit(row.original)}
             className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 text-[12px] font-semibold px-2.5 py-1 rounded-md transition-colors cursor-pointer"
           >
-            <Pencil className="size-3" />
-            Tahrirlash
+            <Pencil className="size-3" /> Tahrirlash
           </button>
           <ConfirmPopover onConfirm={() => onDelete(row.original)}>
             <button
               type="button"
               className="inline-flex items-center gap-1.5 bg-red-50 text-red-600 hover:bg-red-100 text-[12px] font-semibold px-2.5 py-1 rounded-md transition-colors cursor-pointer"
             >
-              <Trash2 className="size-3" />
-              O'chirish
+              <Trash2 className="size-3" /> O'chirish
             </button>
           </ConfirmPopover>
         </div>
@@ -135,21 +123,14 @@ export default function Faculties() {
 
   const { mutate: createCollage, isPending } = useCreateCollage();
   const { mutate: editCollage, isPending: isEditPending } = useEditCollage();
-  const { data: collageResponse, isLoading } = useCollage();
+  const { data: collageResponse, isLoading } = useCollagePage(page, 10, search || undefined);
   const { mutate: deleteCollage } = useDeleteCollage();
-  console.log(collageResponse);
 
-  const collages = collageResponse?.data ?? [];
+  const collages = collageResponse?.data?.body ?? [];
   const totalElements = collageResponse?.data?.totalElements ?? 0;
-  const totalPage = collageResponse?.data?.totalPages ?? 0;
+  const totalPage = collageResponse?.data?.totalPage ?? 0;
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    control,
-    formState: { errors },
-  } = useForm<FacultyFormValues>({
+  const { register, handleSubmit, reset, control, formState: { errors } } = useForm<FacultyFormValues>({
     defaultValues: { name: "", image: null },
   });
 
@@ -159,15 +140,8 @@ export default function Faculties() {
     }
   }, [editData, reset]);
 
-  const filtered = useMemo(() => collages, [collages]);
-
   const columns = useMemo(
-    () =>
-      createColumns(
-        (row) => open(row),
-        (row) => deleteCollage({ id: row.id }),
-        page,
-      ),
+    () => createColumns((row) => open(row), (row) => deleteCollage({ id: row.id }), page),
     [open, page],
   );
 
@@ -179,21 +153,14 @@ export default function Faculties() {
   const onSubmit = (values: FacultyFormValues) => {
     if (isEdit) {
       editCollage(
-        {
-          id: editData.id,
-          name: values.name,
-          image: values.image ?? undefined,
-          imgUrl: editData.imgUrl,
-        },
+        { id: editData.id, name: values.name, image: values.image ?? undefined, imgUrl: editData.imgUrl },
         { onSuccess: handleClose },
       );
       return;
     }
-    createCollage(
-      { name: values.name, image: values.image },
-      { onSuccess: handleClose },
-    );
+    createCollage({ name: values.name, image: values.image }, { onSuccess: handleClose });
   };
+
   const isSubmitting = isPending || isEditPending;
 
   return (
@@ -209,22 +176,15 @@ export default function Faculties() {
 
       <DataTable
         columns={columns}
-        data={filtered}
+        data={collages}
         isLoading={isLoading}
         page={page}
         totalPage={totalPage}
         onPageChange={setPage}
       />
 
-      <Modal
-        open={isOpen}
-        onClose={handleClose}
-        title={isEdit ? "Fakultet tahrirlash" : "Fakultet qo'shish"}
-      >
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col gap-5 py-2"
-        >
+      <Modal open={isOpen} onClose={handleClose} title={isEdit ? "Fakultet tahrirlash" : "Fakultet qo'shish"}>
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5 py-2">
           <div className="flex flex-col gap-2">
             <Label>Rasm</Label>
             <Controller
@@ -232,18 +192,10 @@ export default function Faculties() {
               control={control}
               rules={{ required: isEdit ? false : "Rasm tanlanishi shart" }}
               render={({ field }) => (
-                <FileInput
-                  type="image"
-                  value={field.value}
-                  onChange={field.onChange}
-                />
+                <FileInput type="image" value={field.value} onChange={field.onChange} />
               )}
             />
-            {errors.image && (
-              <span className="text-[12px] text-red-500">
-                {errors.image.message}
-              </span>
-            )}
+            {errors.image && <span className="text-[12px] text-red-500">{errors.image.message}</span>}
           </div>
 
           <div className="flex flex-col gap-2">
@@ -251,32 +203,17 @@ export default function Faculties() {
             <Input
               id="faculty-name"
               placeholder="Masalan: Davolash fakulteti"
-              {...register("name", {
-                required: "Fakultet nomi kiritilishi shart",
-              })}
+              {...register("name", { required: "Fakultet nomi kiritilishi shart" })}
             />
-            {errors.name && (
-              <span className="text-[12px] text-red-500">
-                {errors.name.message}
-              </span>
-            )}
+            {errors.name && <span className="text-[12px] text-red-500">{errors.name.message}</span>}
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={isPending}
-            >
+            <Button type="button" variant="outline" onClick={handleClose} disabled={isPending}>
               Bekor qilish
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting
-                ? "Yuklanmoqda..."
-                : isEdit
-                  ? "Saqlash"
-                  : "Qo'shish"}
+              {isSubmitting ? "Yuklanmoqda..." : isEdit ? "Saqlash" : "Qo'shish"}
             </Button>
           </div>
         </form>
