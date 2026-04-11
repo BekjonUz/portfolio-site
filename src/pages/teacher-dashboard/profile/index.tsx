@@ -68,7 +68,7 @@ export default function TeacherProfile() {
 
   return (
     <div className="flex flex-col lg:flex-row gap-5 items-start">
-      <ProfileSidebar profile={profileValues} />
+      <ProfileSidebar profile={profileValues} userId={teacherId} />
       <div className="w-full lg:flex-1">
         <ProfileForm
           key={teacherId}

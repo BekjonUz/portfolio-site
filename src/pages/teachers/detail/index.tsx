@@ -137,7 +137,7 @@ export default function TeacherDetail() {
       </nav>
 
       <div className="flex flex-col lg:flex-row gap-6 items-start">
-        <ProfileSidebar profile={profileValues} />
+        <ProfileSidebar profile={profileValues} userId={teacherId} />
         <div className="w-full lg:flex-1">
           <ProfileForm
           key={teacherId}

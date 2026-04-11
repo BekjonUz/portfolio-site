@@ -37,3 +37,9 @@ export interface UserProfile {
   consultation?: PagedData<any>;
   award?: PagedData<any>;
 }
+
+export interface ProfileCompletionResponse {
+  success: boolean;
+  message: string;
+  data: number;
+}

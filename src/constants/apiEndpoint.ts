@@ -2,6 +2,7 @@ const API_ENDPOINTS = {
   LOGIN: "/auth/login",
   USER: {
     USER_ME: "/user",
+    PROFILE_COMPLETION: "/user/profile-completion/:userId",
   },
   FILE: {
     IMAGE: "/api/v1/files",
